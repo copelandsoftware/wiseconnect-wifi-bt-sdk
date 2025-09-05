@@ -358,13 +358,19 @@ typedef struct rsi_rsp_dns_query_s {
 /******************************************************
  * *               Function Declarations
  * ******************************************************/
-
 int32_t rsi_dns_req(uint8_t ip_version,
                     uint8_t *url_name,
                     uint8_t *primary_server_address,
                     uint8_t *secondary_server_address,
                     rsi_rsp_dns_query_t *dns_query_resp,
                     uint16_t length);
+
+int32_t rsi_dns_req_async(uint8_t ip_version,
+                          uint8_t *url_name,
+                          uint8_t *primary_server_address,
+                          uint8_t *secondary_server_address,
+                          void (*dns_response_callback)(int32_t status, const uint8_t *buffer, const uint16_t length));
+
 int32_t rsi_dns_update(uint8_t ip_version,
                        uint8_t *zone_name,
                        uint8_t *host_name,

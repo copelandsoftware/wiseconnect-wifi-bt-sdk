@@ -1146,6 +1146,9 @@ typedef struct rsi_rsp_nw_params_s {
   //sockets information array
   rsi_sock_info_query_t socket_info[RSI_MN_NUM_SOCKETS];
 
+  //bssid of connected AP
+  uint8_t bssid[6];
+
 } rsi_rsp_nw_params_t;
 
 // go paramas response structure

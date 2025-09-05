@@ -3,8 +3,23 @@
 #ifndef __GNUC__
 #define __GNUC__ 1
 #endif
+
+#define SDIO_INTERFACE  1
+#define SPI_INTERFACE   2
+#define UART_INTERFACE  3
+
+#define INTERFACE_TYPE SDIO_INTERFACE
+
+#if (INTERFACE_TYPE == SDIO_INTERFACE)
 #define RSI_SDIO_INTERFACE
 #define EFM32_SDIO
+#elif (INTERFACE_TYPE == SPI_INTERFACE)
+#define RSI_SPI_INTERFACE
+#define RSI_SPI_HIGH_SPEED_ENABLE
+#elif (INTERFACE_TYPE == UART_INTERFACE)
+#define RSI_UART_INTERFACE
+#define EFX_UART_HAL
+#endif
 
 // Declaration of MCU type
 #define RSI_ARM_CM4F

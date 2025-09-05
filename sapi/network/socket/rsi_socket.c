@@ -812,7 +812,6 @@ int32_t rsi_sendto_async(int32_t sockID,
  * @param[in]   flags          - Reserved
  * @return      Number of bytes received successfully – Success
  * @return      Negative value                        – Failure
- * @return      0                                     – Socket close error
  * @note        **Precondition** - \ref rsi_connect()/ \ref rsi_accept() API needs to be called before this API.
  * @note        The following table lists the maximum individual chunk of data that can be sent over each supported protocol.
 
@@ -1409,17 +1408,23 @@ int rsi_fill_tls_extension(int32_t sockID, int extension_type, const void *optio
  * @param[in]    sockID       - Socket descriptor ID
  * @param[in]    level        - Set the socket option, take the socket level
  * @param[in]    option_name  - Provide the name of the ID. \n
- *                              SO_MAX_RETRY - Select TCP max retry count \n
- *                              SO_SOCK_VAP_ID - Select the VAP ID \n
- *                                VAP ID to differentiate between station and AP in concurrent mode. 0 – for station, 1 – for Access point
- *                              SO_TCP_KEEP_ALIVE - Configure the TCP keep alive initial time in seconds \n
- *                              SO_RCVBUF - Configure the application buffer for receiving server certificate \n
- *                              SO_SSL_ENABLE- To open an SSL/TLS connection over TCP socket. By default supports versions of both TLS 1.0 and TLS 1.2 \n
- *                              SO_SSL_V_1_0_ENABLE- To open an SSL/TLS connection over TCP socket with TLS version 1.0 \n 
- *                              SO_SSL_V_1_1_ENABLE- To open an SSL/TLS connection over TCP socket with TLS version 1.1 \n
- *                              SO_SSL_V_1_2_ENABLE- To open an SSL/TLS connection over TCP socket with TLS version 1.2 \n
- *                              SO_HIGH_PERFORMANCE_SOCKET-Configure high performance socket \n
- *                              IP_TOS - Configure the type of service value [0-7]
+ *                              SO_MAXRETRY - To Enable max tcp retry count \n
+ *                              SO_SOCK_VAP_ID - To Configure the socket VAP ID. VAP ID to differentiate between station and AP in concurrent mode. 0 – for station, 1 – for Access point \n
+ *                              SO_TCP_KEEP_ALIVE - To configure the TCP keep alive (initial time in seconds) \n
+ *                              SO_RCVBUF - To configure the application buffer for receiving server certificate \n
+ *                              SO_SSL_ENABLE - To open an SSL/TLS connection over TCP socket. By default supports versions of both TLS 1.0 and TLS 1.2 \n
+ *                              SO_SSL_V_1_0_ENABLE - To open an SSL/TLS connection over TCP socket with TLS version 1.0 \n 
+ *                              SO_SSL_V_1_1_ENABLE - To open an SSL/TLS connection over TCP socket with TLS version 1.1 \n
+ *                              SO_SSL_V_1_2_ENABLE - To open an SSL/TLS connection over TCP socket with TLS version 1.2 \n
+ *                              SO_TCP_ACK_INDICATION - To enable tcp ack indication feature \n
+ *                              SO_CERT_INDEX - To enable set certificate index \n
+ *                              SO_HIGH_PERFORMANCE_SOCKET - To Configure the high performance socket \n
+ *                              SO_TCP_MSS - To Configure the tcp mss \n
+ *                              SO_TCP_RETRY_TRANSMIT_TIMER - To Configure the tcp retry transmit timer \n
+ *                              SO_TLS_SNI - To Configure the TLS SNI extension \n
+ *                              SO_RCVTIMEO - To configure the socket-receive timeout using this option. If no data is received within this time, the sapi driver will unblock this API. \n
+ *                              SO_CHECK_CONNECTED_STATE - To check for the connected state \n
+ *                              IP_TOS - To configure the type of service value [0-7]
  *                                | TOS | Value	Description                                                         |
  *                                |-----|---------------------------------------------------------------------------|
  *                                |  0	| Best Effort                                                               |   
@@ -1430,8 +1435,6 @@ int rsi_fill_tls_extension(int32_t sockID, int extension_type, const void *optio
  *                                |  5	| Critical - mainly used for voice RTP (Real-time Tranlocal_port Protocol)  |
  *                                |  6	| Internet                                                                  |       
  *                                |  7	| Network                                                                   |
- *                             SO_TLS_SNI for configuring the SNI feature \n
-*                              SO_RCVTIMEO: Configure the socket-receive timeout using this option. If no data is received within this time, the sapi driver will unblock this API.
  *
  * @param[in]    option_value - Value of the parameter
  * @param[in]    option_len   - Length of the parameter
@@ -4443,7 +4446,8 @@ void rsi_post_waiting_socket_semaphore(int32_t sockID)
  *              Negative Value              - Failure \n
  *                                            Possible error codes : 0xBB51, 0xFF74
  *
- *  @note       Call this API before HTTP GET/POST.
+ *  @note       Call this API before HTTP GET/POST. \n
+ *  @note       RSI_WLAN_REQ_SET_SNI is introduced to provide Server Name Indication information for secure embedded/internal sockets such as HTTPs.
  */
 int32_t rsi_set_sni_emb_socket(uint8_t app_protocol, uint8_t *hostname, uint16_t length)
 {
@@ -4529,7 +4533,8 @@ int32_t rsi_set_sni_emb_socket(uint8_t app_protocol, uint8_t *hostname, uint16_t
  * @return       Non-Zero Value - Failure (**Possible Error Codes** - 0xffffff82) \n
  * @note         **Precondition** - \ref rsi_config_ipaddress() API needs to be called before this API.
  * @note Examples : rsi_network_app_protocol_config(RSI_HTTP, RSI_CIPHER_SELECTION, &cipher_value, 4); \n
- *       cipher_value : (SSL_NEW_CIPHERS | BIT_DHE_RSA_GCM | BIT_ECDHE_RSA_GCM )
+ *       cipher_value : (SSL_NEW_CIPHERS | BIT_DHE_RSA_GCM | BIT_ECDHE_RSA_GCM ) \n
+ * @note RSI_WLAN_REQ_NWK_APP_PROTOCOL_CONFIG is introduced to pass network application configurations to firmware.
  * 
  */
 

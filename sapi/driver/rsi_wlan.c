@@ -1132,6 +1132,9 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
               memcpy(((rsi_rsp_wireless_info_t *)rsi_wlan_cb->app_buffer)->ipv6_address,
                      ((rsi_rsp_nw_params_t *)payload)->ipv6_address,
                      16);
+              memcpy(((rsi_rsp_wireless_info_t *)rsi_wlan_cb->app_buffer)->bssid,
+                     ((rsi_rsp_nw_params_t *)payload)->bssid,
+                     6);
             }
 
           } else if (rsi_wlan_cb->query_cmd == RSI_SOCKETS_INFO) {
@@ -1943,7 +1946,6 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
     }
       // no break
     case RSI_WLAN_RSP_DNS_QUERY: {
-
       if (status == RSI_SUCCESS) {
         if ((rsi_driver_cb_non_rom->nwk_app_buffer != NULL) && (rsi_driver_cb_non_rom->nwk_app_buffer_length != 0)) {
           copy_length = (payload_length < rsi_driver_cb_non_rom->nwk_app_buffer_length)
@@ -1953,6 +1955,11 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
         }
       }
       rsi_driver_cb_non_rom->nwk_app_buffer = NULL;
+
+      if (rsi_wlan_cb_non_rom->nwk_callbacks.rsi_dns_query_rsp_handler != NULL) {
+        rsi_wlan_cb_non_rom->nwk_callbacks.rsi_dns_query_rsp_handler(status, payload, payload_length);
+        rsi_wlan_cb_non_rom->nwk_cmd_rsp_pending &= ~(DNS_RESPONSE_PENDING);
+      }
 
     } break;
     case RSI_WLAN_RSP_FTP: {
@@ -2489,6 +2496,8 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
  * @return       Non-Zero Value - Failure (**Possible Error Codes** - 0x0021) \n
  * @note         **Precondition** - \ref rsi_wireless_init() API must be called before this API.        
  * @note         rsi_wlan_radio_init() is used if user wants to configure any other parameters, which are supposed to be given before rsi_wlan_scan() or rsi_wlan_scan_async() API
+ * @note         In AP mode, the behavior of RS9116 modules is as follows,
+ *               - The device region for modules parts cannot be manually configured by the user. It automatically updates to align with the region of the connected AP.
  */
 
 int32_t rsi_wlan_radio_init(void)
@@ -3275,11 +3284,16 @@ void rsi_call_asynchronous_callback()
     rsi_wlan_cb_non_rom->nwk_cmd_rsp_pending &= ~(PING_RESPONSE_PENDING);
   }
 
-  if ((rsi_wlan_cb_non_rom->nwk_cmd_rsp_pending & (DNS_RESPONSE_PENDING))
-      && rsi_wlan_cb_non_rom->nwk_callbacks.rsi_dns_update_rsp_handler != NULL) {
-    rsi_wlan_cb_non_rom->nwk_callbacks.rsi_dns_update_rsp_handler((uint16_t)RSI_ERROR_IN_WLAN_CMD);
+  if (rsi_wlan_cb_non_rom->nwk_cmd_rsp_pending & (DNS_RESPONSE_PENDING)) {
+    if (rsi_wlan_cb_non_rom->nwk_callbacks.rsi_dns_update_rsp_handler != NULL) {
+      rsi_wlan_cb_non_rom->nwk_callbacks.rsi_dns_update_rsp_handler((uint16_t)RSI_ERROR_IN_WLAN_CMD);
+    }
+    if (rsi_wlan_cb_non_rom->nwk_callbacks.rsi_dns_query_rsp_handler != NULL) {
+      rsi_wlan_cb_non_rom->nwk_callbacks.rsi_dns_query_rsp_handler((uint16_t)RSI_ERROR_IN_WLAN_CMD, NULL, 0);
+    }
     rsi_wlan_cb_non_rom->nwk_cmd_rsp_pending &= ~(DNS_RESPONSE_PENDING);
   }
+
   if ((rsi_wlan_cb_non_rom->nwk_cmd_rsp_pending & (SNTP_RESPONSE_PENDING))
       && rsi_wlan_cb_non_rom->nwk_callbacks.rsi_sntp_client_create_response_handler != NULL) {
     rsi_wlan_cb_non_rom->nwk_callbacks.rsi_sntp_client_create_response_handler((uint16_t)RSI_ERROR_IN_WLAN_CMD,

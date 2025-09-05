@@ -2981,6 +2981,7 @@ int32_t rsi_calib_read(uint8_t target, rsi_calib_read_t *calib_data)
  * @brief  RF calibration process. This API will command the firmware to update the existing Flash/EFuse calibration data. This is a blocking API.
  * @pre     \ref rsi_transmit_test_start(), \ref API needs to be called before this API.This API is relevant in PER mode only.
  * @param[in]         dpd_power_inx \n
+ * @note              RSI_WLAN_REQ_GET_DPD_DATA is not supported.
  * @return            0     - Success \n
  *                    Non-Zero Value  - Failure
  */
@@ -4036,17 +4037,18 @@ int32_t rsi_wlan_set_certificate_index(uint8_t certificate_type,
  * @note       Refer to \ref error-codes for the description of above error codes. \n 
  * @note       For TLS Certificates, the max length is 12280 bytes and for the Private Keys, it is 4088 bytes. \n
  *             Module shares same TLS certificates for all supported SSL sockets. \n
- * @note       For enterprise, user can load certificates in two ways: \n
- *             -  User can load a single certificate, for this user need to generate a single certificate which contains a combination of 4 certificates \n 
+ * @note       For enterprise use case, certificates can be loaded using either of the two methods described below; however, both methods cannot be used at the same time: \n
+ *             -  User can load a combined certificate, for this user need to generate a combined certificate which contains a combination of 4 certificates \n 
  *             in a given fixed order(3 actual and 1 dummy)- one Private Key, one Public Key, one dummy, and one CA certificate. The CA certificate can \n 
  *             include a chain of certificates. Make sure each certificate has their respective header and footer of -----BEGIN CERTIFICATE----- \n
  *             and -----END CERTIFICATE-----. The dummy certificate can be a copy of one of the certificates for convenience(but must have header and footer). \n 
  *             The dummy certificate is not used for the authentication but is expected by the firmware. \n
- *             The single certificate can be loaded with CertType as 1. The maximum allowed single certificate length is 12280 bytes if webpages feature \n 
+ *             The combined certificate can be loaded with CertType as 1. The maximum allowed combined certificate length is 12280 bytes if webpages feature \n 
  *             (TCP_IP_FEAT_HTTP_SERVER in tcp_ip_feature_bit_map) is enabled, otherwise it is 20472 bytes. \n \n
  *             -  User can load individual EAP certificates private key, public key, and CA certificates with CertType as 17,33 and 49 respectively. \n 
  *             The maximum certificate length for private key and public key is 4088 bytes. The maximum allowed CA certificate length is 4088 bytes if webpages \n
  *             feature (TCP_IP_FEAT_HTTP_SERVER in tcp_ip_feature_bit_map) is enabled, otherwise it is 12280 bytes.
+ * @note       Prior to implementing either the combined or individual certificate loading method, all certificate storage locations (1, 17, 33, and 49) must be cleared.
  *
  */
 int32_t rsi_wlan_set_certificate(uint8_t certificate_type, uint8_t *buffer, uint32_t certificate_length)
@@ -4109,7 +4111,8 @@ int32_t rsi_wlan_get_status(void)
  * @note	     RSI_WLAN_INFO is relevant in both station and AP mode. \n
  * @note	     RSI_SOCKETS_INFO is relevant in both station mode and AP mode. \n
  * @note	     RSI_STATIONS_INFO is relevant in AP mode \n
- * @note	     RSI_GET_WLAN_STATS is relevant in AP and Station mode
+ * @note	     RSI_GET_WLAN_STATS is relevant in AP and Station mode \n
+ * @note	     RSI_GET_DEVICE_ID returns the device ID, allowing the application to distinguish between 9116 and 917 chipsets.
  * @return   	 0 	             - Success 
  * @return   	 Non-Zero Value  - Failure (**Possible Error Codes** - 0xfffffffd,0xfffffffc,0xfffffffa) \n           
  * @note       **Precondition** - \ref rsi_wireless_init () API needs to be called before this API.
@@ -4845,6 +4848,8 @@ int32_t rsi_wlan_buffer_config(void)
  * @note       For AP mode with WPA3 security, only SAE-H2E method is supported. SAE Hunting-and-Pecking method is not supported.
  * @note       In WPA3(Personal or Personal transition) security mode, TKIP encryption mode is not supported. Encryption mode is automatically configured to RSI_CCMP.
  * @note       Transition Disable Indication(TDI) is supported in WPA3 (Personal or Personal Transition) security in AP mode. In order to enable TDI, bit 4 of encryption_mode should be set.
+ * @note         In AP mode, the behavior of RS9116 modules is as follows,
+ *               - The device region for modules parts cannot be manually configured by the user. It automatically updates to align with the region of the connected AP.
  * @note       Refer to \ref error-codes for the description of above error codes.
  *
  *
@@ -7414,7 +7419,7 @@ int32_t rsi_wlan_delete_profile(uint32_t type)
  *            To avoid this, user have to disable auto_join feature and give other commands.
  * @note      The parameters of the following APIs are saved when rsi_wlan_enable_auto_config() is called: \n
  *            rsi_wireless_init(), rsi_wlan_scan(), rsi_wlan_scan_with_bitmap_options(), rsi_wlan_connect(), \n
- *            rsi_config_ipaddress(), rsi_wireless_antenna(), rsi_wlan_bgscan_profile(), rsi_radio_caps(), rsi_wlan_ap_start
+ *            rsi_config_ipaddress(), rsi_wireless_antenna(), rsi_wlan_bgscan_profile(), rsi_wlan_ap_start()
  * @note      Refer to \ref error-codes for the description of above error codes.
  *
  *

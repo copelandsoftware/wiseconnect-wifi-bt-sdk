@@ -1092,11 +1092,8 @@ typedef struct rsi_rsp_wireless_info_s {
   // uint8[16], Module IPv6 Address
   uint8_t ipv6_address[16];
 
-  // reserved1
-  uint8_t reserved1[2];
-
-  // reserved2
-  uint8_t reserved2[2];
+  // bssid of connected AP
+  uint8_t bssid[6];
 
 } rsi_rsp_wireless_info_t;
 

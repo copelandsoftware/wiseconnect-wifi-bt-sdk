@@ -80,6 +80,8 @@
 #define RSI_BT_STATE_NONE          0
 #define RSI_BT_STATE_OPERMODE_DONE 1
 #define LOWERNIBBLE                0x0F
+
+#define BT_BLE_GET_COUNTRY_REGION 0x0026
 /******************************************************
  * *                    Constants
  * ******************************************************/
@@ -118,7 +120,10 @@ typedef enum rsi_bt_common_cmd_request_e {
 
   RSI_BLE_ONLY_OPER_MODE = 0x8010,
   RSI_BLE_REQ_PWRMODE    = 0x8015,
-  RSI_BLE_REQ_SOFTRESET  = 0x801C
+  RSI_BLE_REQ_SOFTRESET  = 0x801C,
+
+  RSI_BT_SET_GET_COUNTRY_REGION = 0x0175
+
 } rsi_bt_common_cmd_request_t;
 
 typedef enum rsi_bt_common_event_e {
@@ -292,6 +297,12 @@ typedef struct rsi_bt_resp_get_bt_stack_version_s {
   /** stack version variable */
   int8_t stack_version[10];
 } rsi_bt_resp_get_bt_stack_version_t;
+
+// Set and Get BT country region
+typedef struct rsi_bt_set_get_bt_country_region_s {
+  /* country region variable */
+  uint8_t country_region;
+} rsi_bt_set_get_bt_country_region_t;
 
 // Set antenna structure
 typedef struct rsi_ble_set_antenna_s {

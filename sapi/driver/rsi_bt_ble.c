@@ -212,7 +212,7 @@ uint8_t rsi_bt_get_ACL_type(uint16_t rsp_type)
       || ((rsp_type >= RSI_BT_REQ_SET_PROFILE_MODE) && (rsp_type <= RSI_BT_REQ_UNBOND))
       || ((rsp_type >= RSI_BT_REQ_USER_CONFIRMATION) && (rsp_type <= RSI_BT_REQ_DEL_LINKKEYS))
       || (rsp_type == RSI_BT_REQ_LINKKEY_REPLY) || ((rsp_type >= RSI_BT_REQ_PER_TX) && (rsp_type <= RSI_BT_REQ_PER_RX))
-      || (rsp_type == RSI_BT_REQ_CW_MODE)
+      || (rsp_type == RSI_BT_REQ_CW_MODE) || (rsp_type == RSI_BT_SET_GET_COUNTRY_REGION)
       || ((rsp_type >= RSI_BT_REQ_SNIFF_MODE) && (rsp_type <= RSI_BT_REQ_SET_SSP_MODE))
       || (rsp_type == RSI_BT_REQ_SET_EIR)
       || ((rsp_type >= RSI_BT_REQ_A2DP_CLOSE) && (rsp_type <= RSI_BT_REQ_BR_EDR_LP_HP_TRANSISTION))
@@ -286,12 +286,13 @@ uint16_t rsi_bt_get_proto_type(uint16_t rsp_type, rsi_bt_cb_t **bt_cb)
   if ((rsp_type == RSI_BT_EVENT_CARD_READY)
       || ((rsp_type >= RSI_BT_SET_LOCAL_NAME) && (rsp_type <= RSI_BT_GET_LOCAL_DEV_ADDR))
       || ((rsp_type >= RSI_BT_REQ_INIT) && (rsp_type <= RSI_BT_SET_ANTENNA_SELECT))
-      || (rsp_type == RSI_BT_SET_FEATURES_BITMAP) || (rsp_type == RSI_BT_SET_ANTENNA_TX_POWER_LEVEL)
-      || (rsp_type == RSI_BT_SET_BD_ADDR_REQ) || (rsp_type == RSI_BLE_ONLY_OPER_MODE)
-      || (rsp_type == RSI_BLE_REQ_PWRMODE) || (rsp_type == RSI_BLE_REQ_SOFTRESET) || (rsp_type == RSI_BT_REQ_PER_CMD)
-      || (rsp_type == RSI_BT_VENDOR_SPECIFIC) || (rsp_type == RSI_BT_GET_BT_STACK_VERSION)
-      || (rsp_type == RSI_BT_REQ_L2CAP_CONNECT) || (rsp_type == RSI_BT_REQ_L2CAP_DISCONNECT)
-      || (rsp_type == RSI_BT_REQ_L2CAP_PROTOCOL_DATA) || (rsp_type == RSI_BT_REQ_L2CAP_ERTM_CONFIGURE)
+      || (rsp_type == RSI_BT_SET_GET_COUNTRY_REGION) || (rsp_type == RSI_BT_SET_FEATURES_BITMAP)
+      || (rsp_type == RSI_BT_SET_ANTENNA_TX_POWER_LEVEL) || (rsp_type == RSI_BT_SET_BD_ADDR_REQ)
+      || (rsp_type == RSI_BLE_ONLY_OPER_MODE) || (rsp_type == RSI_BLE_REQ_PWRMODE)
+      || (rsp_type == RSI_BLE_REQ_SOFTRESET) || (rsp_type == RSI_BT_REQ_PER_CMD) || (rsp_type == RSI_BT_VENDOR_SPECIFIC)
+      || (rsp_type == RSI_BT_GET_BT_STACK_VERSION) || (rsp_type == RSI_BT_REQ_L2CAP_CONNECT)
+      || (rsp_type == RSI_BT_REQ_L2CAP_DISCONNECT) || (rsp_type == RSI_BT_REQ_L2CAP_PROTOCOL_DATA)
+      || (rsp_type == RSI_BT_REQ_L2CAP_ERTM_CONFIGURE)
       || (rsp_type == RSI_BT_SET_GAIN_TABLE_OFFSET_OR_MAX_POWER_UPDATE)) {
     return_value = RSI_PROTO_BT_COMMON;
     *bt_cb       = rsi_driver_cb->bt_common_cb;
@@ -3103,6 +3104,10 @@ uint16_t rsi_bt_prepare_common_pkt(uint16_t cmd_type, void *cmd_struct, rsi_pkt_
       break;
     case RSI_BT_SET_ANTENNA_SELECT: {
       payload_size = sizeof(rsi_ble_set_antenna_t);
+      memcpy(pkt->data, cmd_struct, payload_size);
+    } break;
+    case RSI_BT_SET_GET_COUNTRY_REGION: {
+      payload_size = sizeof(rsi_bt_set_get_bt_country_region_t);
       memcpy(pkt->data, cmd_struct, payload_size);
     } break;
     case RSI_BT_SET_FEATURES_BITMAP: {

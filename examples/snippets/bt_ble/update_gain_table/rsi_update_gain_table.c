@@ -49,6 +49,7 @@
 #define BLE_NODE                    0
 #define BT_NODE                     1
 #define ACX_MODULE                  4
+
 /* BT/BLE  gain offset tables non acx module */
 uint8_t RS9116_BT_REGION_BASED_MAXPOWER_VS_OFFSET_XX[] = { 5, 0,  4, 255, 0, 0,   0, 39, 0, 78,  2, 1,  4, 255,
                                                            0, 0,  0, 39,  0, 78,  0, 2,  4, 255, 3, 12, 0, 15,
@@ -94,7 +95,7 @@ int rsi_app_task_update_gain_table(void)
   uint8_t _RS9116_BLE_REGION_BASED_MAXPOWER_VS_OFFSET_XX[128];
   uint8_t _RS9116_BT_REGION_BASED_MAXPOWER_XX[10];
   uint8_t _RS9116_BT_REGION_BASED_MAXPOWER_VS_OFFSET_XX[128];
-
+  rsi_bt_set_get_bt_country_region_t set_get_region;
   status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
   if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
     return status;
@@ -124,6 +125,22 @@ int rsi_app_task_update_gain_table(void)
     LOG_PRINT("\r\n Module type = %d", module_type);
   }
   if (module_type == ACX_MODULE) {
+    status = rsi_bt_set_country_region(COUNTRY_REGION, &set_get_region);
+    if (status != RSI_SUCCESS) {
+      LOG_PRINT("\r\nCountry Region Failed, Error Code : 0x%lX\r\n", status);
+    } else {
+      LOG_PRINT("\nSetting country region success : 0x%lX\r\n", status);
+      LOG_PRINT(" \n read country_region cmd success and  \n country region = %u \n ", set_get_region.country_region);
+    }
+
+    status = rsi_bt_get_country_region(&set_get_region);
+    if (status != RSI_SUCCESS) {
+      LOG_PRINT("\r\nCountry Region Failed, Error Code : 0x%lX\r\n", status);
+    } else {
+      LOG_PRINT("\nSetting country region success : 0x%lX\r\n", status);
+      LOG_PRINT(" \n read country_region cmd success and  \n country region = %u \n ", set_get_region.country_region);
+    }
+
     memcpy(_RS9116_BLE_REGION_BASED_MAXPOWER_XX,
            RS9116_BLE_REGION_BASED_MAXPOWER_AC1,
            sizeof(RS9116_BLE_REGION_BASED_MAXPOWER_AC1));

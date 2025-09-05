@@ -21,26 +21,25 @@
 */
 /*==============================================*/
 /**
- * @brief      Query the IP address of a given domain name. This is a blocking API.
+ * @brief      Query the IP address of a given domain name. This is a non-blocking API.
  * @pre  \ref rsi_config_ipaddress() API needs to be called before this API.
  * @param[in]  ip_version               - IP version. 4: IPv4, \n 6: IPv6
  * @param[in]  url_name                 - Pointer to the domain name to resolve IP address
  * @param[in]  primary_server_address   - IP address of the DNS server. This parameter is optional, if module gets the DNS server address using DHCP. If DNS server address is obtained using DHCP, in that case this parameter should be NULL.
  * @param[in]  secondary_server_address - IP address of the secondary  DNS server. In case of no secondary DNS server, IP is NULL.
- * @param[out] dns_query_resp          - Pointer to hold DNS query results. 
- * @param[in]  length                   - Length of the resultant buffer.
+ * @param[in]  dns_query_handler 	- Callback that is called when the response for DNS query is received from the module. \n                                                                                        	                                                           The parameters involved are status, buffer, & length. \n
+ *@param[out]    Status                - Response status.                                                                                                                                                         *@param[out]    Buffer                - Response buffer \n                                                                                                                                                       *@param[out]    Length                - The length of the result buffer. /n
  * @return     0              -  Success \n
  * @return     Negative Value - Failure
  * @note       **Precondition** - \ref rsi_config_ipaddress() API needs to be called before this API.
  * @note       DNS mode is determined by the value of primary_server_address. If NULL, then DNS mode is set to DHCP (1), else it is set to Static IP Address (0).
  */
 
-int32_t rsi_dns_req(uint8_t ip_version,
-                    uint8_t *url_name,
-                    uint8_t *primary_server_address,
-                    uint8_t *secondary_server_address,
-                    rsi_rsp_dns_query_t *dns_query_resp,
-                    uint16_t length)
+int32_t rsi_dns_req_async(uint8_t ip_version,
+                          uint8_t *url_name,
+                          uint8_t *primary_server_address,
+                          uint8_t *secondary_server_address,
+                          void (*dns_response_callback)(int32_t status, const uint8_t *buffer, const uint16_t length))
 {
   rsi_req_dns_server_add_t *dns_srever_add;
   rsi_req_dns_query_t *dns_query;
@@ -75,15 +74,13 @@ int32_t rsi_dns_req(uint8_t ip_version,
     return RSI_ERROR_INVALID_PARAM;
   }
 
-  // Check for invalid parameters
-  if ((dns_query_resp == NULL) || (length == 0)) {
-    // Throw error in case of invalid parameters
-    SL_PRINTF(SL_DNS_REQ_INVALID_PARAM_2, NETWORK, LOG_ERROR);
-    return RSI_ERROR_INVALID_PARAM;
-  }
-
   status = rsi_check_and_update_cmd_state(NWK_CMD, IN_USE);
   if (status == RSI_SUCCESS) {
+    // Register callback
+    if (dns_response_callback != NULL) {
+      // Register DNS query response notify call back handler
+      rsi_wlan_cb_non_rom->nwk_callbacks.rsi_dns_query_rsp_handler = dns_response_callback;
+    }
 
     // Allocate command buffer from WLAN pool
     pkt = rsi_pkt_alloc(&wlan_cb->wlan_tx_pool);
@@ -166,11 +163,7 @@ int32_t rsi_dns_req(uint8_t ip_version,
 
     // Memset the packet data
     memset(&pkt->data, 0, sizeof(rsi_req_dns_query_t));
-    // Attach the buffer given by user
-    rsi_driver_cb_non_rom->nwk_app_buffer = (uint8_t *)dns_query_resp;
 
-    // Length of the buffer provided by user
-    rsi_driver_cb_non_rom->nwk_app_buffer_length = length;
     // Set IP version
     rsi_uint16_to_2bytes(dns_query->ip_version, ip_version);
 
@@ -180,20 +173,26 @@ int32_t rsi_dns_req(uint8_t ip_version,
     // Set DNS server number
     rsi_uint16_to_2bytes(dns_query->dns_server_number, 1);
 
+    if (dns_response_callback == NULL) {
 #ifndef RSI_NWK_SEM_BITMAP
-    rsi_driver_cb_non_rom->nwk_wait_bitmap |= BIT(0);
+      rsi_driver_cb_non_rom->nwk_wait_bitmap |= BIT(0);
 #endif
+    } else {
+      rsi_wlan_cb_non_rom->nwk_cmd_rsp_pending |= DNS_RESPONSE_PENDING;
+    }
 
     // Send DNS query command
     status = rsi_driver_wlan_send_cmd(RSI_WLAN_REQ_DNS_QUERY, pkt);
 
-    // Wait on NWK semaphore
-    rsi_wait_on_nwk_semaphore(&rsi_driver_cb_non_rom->nwk_sem, RSI_DNS_QUERY_RESPONSE_WAIT_TIME);
+    if (dns_response_callback == NULL) {
+      // Wait on NWK semaphore
+      rsi_wait_on_nwk_semaphore(&rsi_driver_cb_non_rom->nwk_sem, RSI_DNS_QUERY_RESPONSE_WAIT_TIME);
 
-    // Get WLAN/network command response status
-    status = rsi_wlan_get_nwk_status();
-    // Change NWK state to allow
-    rsi_check_and_update_cmd_state(NWK_CMD, ALLOW);
+      // Get WLAN/network command response status
+      status = rsi_wlan_get_nwk_status();
+      // Change NWK state to allow
+      rsi_check_and_update_cmd_state(NWK_CMD, ALLOW);
+    }
 
   } else {
     // Return NWK command error
@@ -203,6 +202,50 @@ int32_t rsi_dns_req(uint8_t ip_version,
 
   // Return status
   SL_PRINTF(SL_DNS_REQ_EXIT_2, NETWORK, LOG_INFO, "status: %4x", status);
+  return status;
+}
+
+/** 
+ * @brief      Query the IP address of a given domain name. This is a blocking API. 
+ * @pre  \ref rsi_config_ipaddress() API needs to be called before this API. 
+ * @param[in]  ip_version               - IP version. 4: IPv4, \n 6: IPv6 
+ * @param[in]  url_name                 - Pointer to the domain name to resolve IP address 
+ * @param[in]  primary_server_address   - IP address of the DNS server. This parameter is optional, if module gets the DNS server address using DHCP. If DNS server address is obtained using DHCP, in that case this parameter should be NULL.
+ * @param[in]  secondary_server_address - IP address of the secondary  DNS server. In case of no secondary DNS server, IP is NULL.
+ * @param[out] dns_query_resp          - Pointer to hold DNS query results.
+ * @param[in]  length                   - Length of the resultant buffer.
+ * @return     0              -  Success \n
+ * @return     Negative Value - Failure
+ * @note       **Precondition** - \ref rsi_config_ipaddress() API needs to be called before this API.
+ * @note       DNS mode is determined by the value of primary_server_address. If NULL, then DNS mode is set to DHCP (1), else it is set to Static IP Address (0).
+ */
+
+int32_t rsi_dns_req(uint8_t ip_version,
+                    uint8_t *url_name,
+                    uint8_t *primary_server_address,
+                    uint8_t *secondary_server_address,
+                    rsi_rsp_dns_query_t *dns_query_resp,
+                    uint16_t length)
+{
+  int32_t status = RSI_SUCCESS;
+  SL_PRINTF(SL_DNS_REQ_ENTRY, NETWORK, LOG_INFO);
+
+  // Check for invalid parameters
+  if ((dns_query_resp == NULL) || (length == 0)) {
+    // Throw error in case of invalid parameters
+    SL_PRINTF(SL_DNS_REQ_INVALID_PARAM_2, NETWORK, LOG_ERROR);
+    return RSI_ERROR_INVALID_PARAM;
+  }
+
+  // Attach the buffer given by user
+  rsi_driver_cb_non_rom->nwk_app_buffer = (uint8_t *)dns_query_resp;
+
+  // Length of the buffer provided by user
+  rsi_driver_cb_non_rom->nwk_app_buffer_length = length;
+
+  //! Call ASYNC DNS QUERY
+  status = rsi_dns_req_async(ip_version, url_name, primary_server_address, secondary_server_address, NULL);
+
   return status;
 }
 
@@ -233,7 +276,7 @@ int32_t rsi_dns_update(uint8_t ip_version,
                        uint16_t ttl,
                        void (*dns_update_rsp_handler)(uint16_t status))
 {
-  rsi_req_dns_server_add_t *dns_srever_add;
+  rsi_req_dns_server_add_t *dns_server_add;
   rsi_req_dns_update_t *dns_update;
   rsi_pkt_t *pkt;
   int32_t status = RSI_SUCCESS;
@@ -290,30 +333,30 @@ int32_t rsi_dns_update(uint8_t ip_version,
       return RSI_ERROR_PKT_ALLOCATION_FAILURE;
     }
 
-    dns_srever_add = (rsi_req_dns_server_add_t *)pkt->data;
+    dns_server_add = (rsi_req_dns_server_add_t *)pkt->data;
 
     // Memset the packet data
     memset(&pkt->data, 0, sizeof(rsi_req_dns_server_add_t));
 
     // Set ip version
-    rsi_uint16_to_2bytes(dns_srever_add->ip_version, ip_version);
+    rsi_uint16_to_2bytes(dns_server_add->ip_version, ip_version);
 
     // Set DNS mode
     dns_mode = (server_address != NULL) ? RSI_STATIC : RSI_DHCP;
 
     // Set user selected DNS mode
-    rsi_uint16_to_2bytes(dns_srever_add->dns_mode, dns_mode);
+    rsi_uint16_to_2bytes(dns_server_add->dns_mode, dns_mode);
 
     if (ip_version == RSI_IP_VERSION_4) {
 
       if (server_address) {
         // Fill Primary IP address
-        memcpy(dns_srever_add->ip_address1.primary_dns_ipv4, server_address, RSI_IPV4_ADDRESS_LENGTH);
+        memcpy(dns_server_add->ip_address1.primary_dns_ipv4, server_address, RSI_IPV4_ADDRESS_LENGTH);
       }
     } else {
       if (server_address) {
         // Fill Primary IP address
-        memcpy(dns_srever_add->ip_address1.primary_dns_ipv6, server_address, RSI_IPV6_ADDRESS_LENGTH);
+        memcpy(dns_server_add->ip_address1.primary_dns_ipv6, server_address, RSI_IPV6_ADDRESS_LENGTH);
       }
     }
 

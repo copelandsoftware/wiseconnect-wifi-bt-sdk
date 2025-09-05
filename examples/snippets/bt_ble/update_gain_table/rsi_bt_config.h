@@ -92,4 +92,14 @@
   1010 /*In Stack MAX_ACL_PKT_LEN is 1010*/ //310 /* Max supported is 200, but 190 gives optimum Tx throughput */
 #define BT_BDR_MODE 0                       // 1 - HP chain
 
+/*
+FCC        0
+ETSI       1
+TELEC      2
+WORLDWIDE  3
+KCC        4
+WORLDSAFE  5
+*/
+//! Assign the required region value as per the above info to COUNTRY_REGION
+#define COUNTRY_REGION 2
 #endif

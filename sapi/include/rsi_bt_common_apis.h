@@ -136,6 +136,21 @@ int32_t rsi_bt_set_antenna(uint8_t antenna_value);
 
 /*==============================================*/
 /**
+ * @fn         rsi_bt_set_country_region
+ *
+ *
+ */
+int32_t rsi_bt_set_country_region(uint8_t region, void *resp);
+
+/*==============================================*/
+/**
+ * @fn         rsi_bt_get_country_region
+ *
+ *
+ */
+int32_t rsi_bt_get_country_region(void *resp);
+/*==============================================*/
+/**
  * @fn         rsi_bt_set_feature_bitmap
  *             
  * 

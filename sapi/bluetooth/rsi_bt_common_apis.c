@@ -233,6 +233,46 @@ int32_t rsi_bt_deinit(void)
 
 /*==============================================*/
 /**
+ * @fn         int32_t rsi_bt_set_country_region(uint8_t region, void *resp)
+ * @brief      Set country region command for BT
+ * @pre        \ref rsi_wireless_init() API needs to be called before this API.
+ * @param[in]  region - Parameter is used to set country region.
+ * @param[in]  resp - Actual country region set by device.
+ * @return     0    - Success \n
+ *             Non-Zero Value - Failure
+ * @note       Refer Error Codes section for above error codes \ref error-codes .
+ */
+int32_t rsi_bt_set_country_region(uint8_t region, void *resp)
+{
+  rsi_bt_set_get_bt_country_region_t bt_country_region = { 0 };
+  bt_country_region.country_region                     = region;
+  SL_PRINTF(SL_RSI_BT_SET_REGION, BLUETOOTH, LOG_INFO);
+  return rsi_bt_driver_send_cmd(RSI_BT_SET_GET_COUNTRY_REGION,
+                                &bt_country_region,
+                                (rsi_bt_set_get_bt_country_region_t *)resp);
+}
+
+/*==============================================*/
+/**
+ * @fn         int32_t rsi_bt_get_country_region(void *resp)
+ * @brief      Set country region command for BT
+ * @pre        \ref rsi_wireless_init() API needs to be called before this API.
+ * @param[in]  resp - Gets the current country region set.
+ * @return     0    - Success \n
+ *             Non-Zero Value - Failure
+ * @note       Refer Error Codes section for above error codes \ref error-codes .
+ */
+int32_t rsi_bt_get_country_region(void *resp)
+{
+  rsi_bt_set_get_bt_country_region_t bt_country_region = { 0 };
+  bt_country_region.country_region                     = BT_BLE_GET_COUNTRY_REGION;
+  SL_PRINTF(SL_RSI_BT_SET_REGION, BLUETOOTH, LOG_INFO);
+  return rsi_bt_driver_send_cmd(RSI_BT_SET_GET_COUNTRY_REGION,
+                                &bt_country_region,
+                                (rsi_bt_set_get_bt_country_region_t *)resp);
+}
+/*==============================================*/
+/**
  * @fn         int32_t rsi_bt_set_antenna(uint8_t antenna_value)
  * @brief      Select either internal / external antenna on the chip. This is blocking API.
  * @pre        \ref rsi_wireless_init() API needs to be called before this API.

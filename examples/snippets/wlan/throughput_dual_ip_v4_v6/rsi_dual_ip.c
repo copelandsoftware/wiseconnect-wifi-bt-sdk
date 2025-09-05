@@ -447,7 +447,7 @@ int32_t application()
     LOG_PRINT("\r\nIPv6 Config Success\r\n");
   }
   LOG_PRINT("RSI_STA IP ADDR \r\n");
-  LOG_PRINT("prefix length : %d\r\n", ip_buff_6[0]);
+  LOG_PRINT("prefix length : %d\r\n", *(uint16_t *)(ip_buff_6));
   LOG_PRINT("linklocaladdr: %s\r\n", link_local_addr);
   LOG_PRINT("global addr:   %s\r\n", global_addr);
   LOG_PRINT("gateway addr:  %s\r\n", gateway6);

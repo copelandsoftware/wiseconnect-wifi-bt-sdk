@@ -106,26 +106,36 @@ LOAD_CERTIFICATE refers whether certificate to load into module or not.
 ```c
 #define LOAD_CERTIFICATE                                      1
 ```      
-      
-If LOAD_CERTIFICATE set to 1, application will load certificate which is included using rsi_wlan_set_certificate API.
-   
-By default, application is loading "wifiuser.pem" certificate when LOAD_CERTIFICATE enabled. In order to load different certificate, user has to do the following steps:
-   
-rsi_wlan_set_certificate API expects the certificate in the form of linear array. So convert the pem certificate into linear array form using python script provided in the SDK "resources/certificates/certificate_to_array.py"
 
-  Example: If the certificate is wifi-user.pem, give the command like the following way: 
+**NOTE**:
 
-  `python certificate_to_array.py wifi-user.pem`
+1. If LOAD_CERTIFICATE set to 1, application will load certificate using **rsi_wlan_set_certificate** API.
    
-  The script will generate `wifiuser.pem` in which one linear array named wifiuser contains the certificate.
-     
-After conversion of certificate, update rsi_eap_connectivity.c source file by including the certificate file and by providing the required parameters to rsi_wlan_set_certificate API.
-   
-Once the certificate loads into the device, it will write into the device flash. So, user need not load certificate for every boot up unless certificate change.
+2. By default, the application loads **wifiuser.pem** certificate present at **release_sdk → resources → certificates**.  
 
-   So define LOAD_CERTIFICATE as 0, if certificate is already present in the device.
+3. For EAP testing, if the user is using the existing wifiuser.pem certificate provided in the release SDK, they must enable bit 11 (TLS_PATH_LENGTH_SUPPORT) of the feature_bit_map in the opermode command.
+
+4. In order to load different certificate, user has to do the following steps:
    
-USER_IDENTITY refers to user ID which is configured in the user configuration file of the radius server. In this example, user identity is "user1".
+-  The certificate has to be passed as a parameter to **rsi_wlan_set_certificate** API in linear array format. Convert the **.pem** format certificate into linear array form using python script provided in the SDK **RS9116 SDK → resources → certificates → certificate_to_array.py**.
+
+-  You can load the certificate in two ways as mentioned below:
+
+	- Aggregate the certificates in to one file in a fixed order of private key, public key, intermediate CA/dummy certificate, and CA certificate and load the certificate with certificate type **1**. Place the certificate at **RS9116 SDK → resources → certificates**. Convert the single certificate file into linear array using the following command.
+
+      	`python certificate_to_array.py wifi-user.pem`
+
+	- Load the EAP certificates - private key, public key, and CA certificates individually with certificate type as 17,33 and 49 respectively. Maximum certificate length for each individual certificate is 4088 bytes. Place the certificate at **RS9116 SDK → resources → certificates**. Convert the certificates into linear array using the following commands.
+
+         `python certificate_to_array.py <private key file name>`
+
+         `python certificate_to_array.py <public key file name>`
+
+         `python certificate_to_array.py <CA certificate file name>`
+
+- After conversion of certificate, it shall generate .h files which contains certificate as a character array. Incliude these files in **rsi_eap_connectivity.c** source file and by providing the required parameters to **rsi_wlan_set_certificate** API. 
+- Once the certificate loads into the device, it will write into the device flash. So, user need not load certificate for every boot up unless certificate change. So define LOAD_CERTIFICATE as 0, if certificate is already present in the device.
+- USER_IDENTITY refers to user ID which is configured in the user configuration file of the radius server. In this example, user identity is "user1".
    
 ```c
 #define USER_IDENTITY                                         "\"user1\""

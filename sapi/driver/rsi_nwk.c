@@ -191,7 +191,8 @@ int16_t rsi_wlan_nwk_register_json_event_cb(uint32_t callback_id,
  * @param[in]   callback_handler_ptr - Callback handler which needs to be registered for a given callback
  * @param[out]  socket_id            - socket id for active connection. 
  * @param[out]  status               - Response status.
- * @param[out]  length               - Length of the response buffer.
+ * @param[out]  length               - Length of the response buffer. \n
+ * @note        The callback rsi_wlan_nwk_register_send_large_data_event_cb notifies the application of the success or failure status of rsi_send_large_data_async.
  * @return      0              - Success \n
  * @return      Positive Value - Failure \n
  * ## prototypes of the callback functions ##

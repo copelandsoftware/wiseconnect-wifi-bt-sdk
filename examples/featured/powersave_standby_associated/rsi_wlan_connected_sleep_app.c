@@ -102,10 +102,10 @@
 #define RSI_DRIVER_TASK_PRIORITY 2
 
 // Wlan task stack size
-#define RSI_APPLICATION_TASK_STACK_SIZE 500
+#define RSI_APPLICATION_TASK_STACK_SIZE 1024
 
 // Wireless driver task stack size
-#define RSI_DRIVER_TASK_STACK_SIZE 500
+#define RSI_DRIVER_TASK_STACK_SIZE 1024
 
 // Memory to initialize driver
 uint8_t global_buf[GLOBAL_BUFF_LEN];

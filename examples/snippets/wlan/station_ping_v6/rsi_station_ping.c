@@ -336,7 +336,7 @@ int32_t rsi_station_ping_app()
 
 #else
   LOG_PRINT("RSI_STA IP ADDR \r\n");
-  LOG_PRINT("prefix length : %d\r\n", ip_buff[0]);
+  LOG_PRINT("prefix length : %d\r\n", *(uint16_t *)(ip_buff));
   LOG_PRINT("linklocaladdr: %s\r\n", link_local_addr);
   LOG_PRINT("global addr:   %s\r\n", global_addr);
   LOG_PRINT("gateway addr:  %s\r\n", gateway6);

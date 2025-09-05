@@ -19,7 +19,7 @@
 #define RSI_WLAN_NON_ROM_H
 #include "rsi_socket.h"
 #include "rsi_os.h"
-
+#include "rsi_nwk.h"
 #include "rsi_scheduler.h"
 
 // Max chunk size
@@ -344,6 +344,9 @@ typedef struct rsi_nwk_callback_s {
 
   // HTTP CLIENT POST data response notify handler pointer
   void (*rsi_ota_fw_up_response_handler)(uint16_t status, uint16_t chunk_number);
+
+  // DNS client hostname query response notify handler pointer
+  void (*rsi_dns_query_rsp_handler)(int32_t status, const uint8_t *buffer, const uint16_t length);
 
   // DNS client hostname update response notify handler pointer
   void (*rsi_dns_update_rsp_handler)(uint16_t status);

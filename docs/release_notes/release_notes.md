@@ -2,6 +2,7 @@
 
 Release notes are provided with each version of the [WiSeConnect&trade; SDK](https://github.com/SiliconLabs/wiseconnect-wifi-bt-sdk).
 
+  - [WiSeConnect&trade; 2.12.1](#wiseconnect-2121-release-notes)
   - [WiSeConnect&trade; 2.12](#wiseconnect-212-release-notes)
   - [WiSeConnect&trade; 2.11.5](#wiseconnect-2115-release-notes)
   - [WiSeConnect&trade; 2.11.4](#wiseconnect-2114-release-notes)
@@ -35,6 +36,11 @@ Release notes are provided with each version of the [WiSeConnect&trade; SDK](htt
   - [WiSeConnect&trade; 2.4](#wiseconnect-24-release-notes)
   - [WiSeConnect&trade; 2.3](https://www.silabs.com/documents/login/release-notes/RS9116W-IoT-Software-2.3-release-notes.pdf)
   - [WiSeConnect&trade; 2.0](https://www.silabs.com/documents/login/release-notes/rs9116w-iot-software-2.0-release-notes.pdf)
+
+# WiSeConnect 2.12.1 Release Notes
+
+Migrated to a new release notes from 2.12.1. Please find the link for the new release notes below:
+[New release notes](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-release-notes/)
 
 # WiSeConnect 2.12 Release Notes
 
