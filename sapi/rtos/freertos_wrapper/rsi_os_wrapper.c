@@ -27,6 +27,7 @@
 #include <semphr.h>
 #include <projdefs.h>
 #include <task.h>
+#include <rsi_os.h>
 #include "rsi_wlan_non_rom.h"
 extern rsi_socket_info_non_rom_t *rsi_socket_pool_non_rom;
 

@@ -245,7 +245,7 @@ int32_t rsi_driver_common_send_cmd(rsi_common_cmd_request_t cmd, rsi_pkt_t *pkt)
         //!ENABLE_BLE_PROTOCOL in bt_feature_bit_map
         rsi_opermode->bt_feature_bit_map[3] |= 0x80;
         rsi_uint32_to_4bytes(rsi_opermode->ble_feature_bit_map,
-                             ((RSI_BLE_MAX_NBR_PERIPHERALS << 12) | (RSI_BLE_MAX_NBR_CENTRALS << 27)
+                             ((RSI_BLE_MAX_NBR_SLAVES << 12) | (RSI_BLE_MAX_NBR_MASTERS << 27)
                               | (RSI_BLE_MAX_NBR_ATT_SERV << 8) | RSI_BLE_MAX_NBR_ATT_REC));
 
         /*Enable BLE custom feature bitmap*/
