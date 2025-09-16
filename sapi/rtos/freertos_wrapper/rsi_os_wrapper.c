@@ -134,7 +134,7 @@ rsi_error_t rsi_mutex_lock(volatile rsi_mutex_handle_t *mutex)
   if (!timeout_ms) {
     timeout_ms = portMAX_DELAY;
   }
-  delayTime = rsi_ms_to_tick(timeout_ms);
+  delayTime = pdMS_TO_TICKS(timeout_ms);
 
   if (xSemaphoreTake(*p_mutex, delayTime) == pdPASS) {
     return RSI_ERROR_NONE;
@@ -313,7 +313,7 @@ rsi_error_t rsi_semaphore_wait(rsi_semaphore_handle_t *semaphore, uint32_t timeo
   }
 
   /*converting ms to ticks*/
-  delayTime = rsi_ms_to_tick(timeout_ms); //Note : xSemaphoreTake accepts time in ticks
+  delayTime = pdMS_TO_TICKS(timeout_ms); //Note : xSemaphoreTake accepts time in ticks
 
   if (xSemaphoreTake(*p_semaphore, delayTime) == pdPASS) {
     return RSI_ERROR_NONE;
@@ -458,7 +458,7 @@ void rsi_task_destroy(rsi_task_handle_t *task_handle)
  */
 void rsi_os_task_delay(uint32_t timeout_ms)
 {
-  TickType_t delayTime = rsi_ms_to_tick(timeout_ms);
+  TickType_t delayTime = pdMS_TO_TICKS(timeout_ms);
   vTaskDelay(delayTime);
 }
 
@@ -513,7 +513,7 @@ rsi_base_type_t rsi_task_notify_wait(uint32_t ulBitsToClearOnEntry,
                                      uint32_t timeout)
 {
   rsi_base_type_t xResult;
-  const TickType_t xMaxBlockTime = rsi_ms_to_tick(timeout);
+  const TickType_t xMaxBlockTime = pdMS_TO_TICKS(timeout);
 
   /* Wait to be notified of an interrupt. */
   xResult = xTaskNotifyWait(ulBitsToClearOnEntry, /* Don't clear bits on entry. */
