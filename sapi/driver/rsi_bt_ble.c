@@ -493,6 +493,10 @@ void rsi_bt_common_tx_done(rsi_pkt_t *pkt)
   // Get the protocol Type
   protocol_type = (uint8_t)rsi_bt_get_proto_type(rsp_type, &bt_cb);
 
+  if (bt_cb == NULL) {
+    return;
+  }
+
   if (protocol_type == 0xFF) {
     return;
   }
@@ -570,7 +574,7 @@ void rsi_ble_update_le_dev_buf(rsi_ble_event_le_dev_buf_ind_t *rsi_ble_event_le_
   uint8_t inx        = 0;
   rsi_bt_cb_t *le_cb = rsi_driver_cb->ble_cb;
 
-  for (inx = 0; inx < (RSI_BLE_MAX_NBR_PERIPHERALS + RSI_BLE_MAX_NBR_CENTRALS); inx++) {
+  for (inx = 0; inx < (RSI_BLE_MAX_NBR_SLAVES + RSI_BLE_MAX_NBR_MASTERS); inx++) {
     if (!memcmp(rsi_ble_event_le_dev_buf_ind->remote_dev_bd_addr,
                 le_cb->remote_ble_info[inx].remote_dev_bd_addr,
                 RSI_DEV_ADDR_LEN)) {
@@ -597,7 +601,7 @@ void rsi_add_remote_ble_dev_info(rsi_ble_event_enhance_conn_status_t *remote_dev
   uint8_t inx        = 0;
   rsi_bt_cb_t *le_cb = rsi_driver_cb->ble_cb;
 
-  for (inx = 0; inx < (RSI_BLE_MAX_NBR_PERIPHERALS + RSI_BLE_MAX_NBR_CENTRALS); inx++) {
+  for (inx = 0; inx < (RSI_BLE_MAX_NBR_SLAVES + RSI_BLE_MAX_NBR_MASTERS); inx++) {
     if (!le_cb->remote_ble_info[inx].used) {
       memcpy(le_cb->remote_ble_info[inx].remote_dev_bd_addr, remote_dev_info->dev_addr, RSI_DEV_ADDR_LEN);
       le_cb->remote_ble_info[inx].used = 1;
@@ -626,7 +630,7 @@ void rsi_remove_remote_ble_dev_info(rsi_ble_event_disconnect_t *remote_dev_info)
   uint8_t inx        = 0;
   rsi_bt_cb_t *le_cb = rsi_driver_cb->ble_cb;
 
-  for (inx = 0; inx < (RSI_BLE_MAX_NBR_PERIPHERALS + RSI_BLE_MAX_NBR_CENTRALS); inx++) {
+  for (inx = 0; inx < (RSI_BLE_MAX_NBR_SLAVES + RSI_BLE_MAX_NBR_MASTERS); inx++) {
     if (!memcmp(remote_dev_info->dev_addr, le_cb->remote_ble_info[inx].remote_dev_bd_addr, RSI_DEV_ADDR_LEN)) {
       memset(le_cb->remote_ble_info[inx].remote_dev_bd_addr, 0, RSI_DEV_ADDR_LEN);
       le_cb->remote_ble_info[inx].used                 = 0;
@@ -669,6 +673,10 @@ int32_t rsi_driver_process_bt_resp(
   uint16_t payload_length;
   uint16_t expected_resp = 0;
 
+    if (bt_cb == NULL) {
+    return RSI_ERROR_INVALID_PARAM;
+  }
+  
   // Get Host Descriptor
   host_desc = pkt->desc;
 
@@ -796,6 +804,10 @@ uint16_t rsi_driver_process_bt_resp_handler(rsi_pkt_t *pkt)
   // Get the protocol Type
   protocol_type = (uint8_t)rsi_bt_get_proto_type(rsp_type, &bt_cb);
 
+  if (bt_cb == NULL) {
+    return 0;
+  }
+  
   SL_PRINTF(SL_RSI_BT_DRIVER_PROCESS_BT_RESP_HANDLER_TRIGGER, BLUETOOTH, LOG_INFO, "PROTOCOL_TYPE: %1x", protocol_type);
   if (protocol_type == 0xFF) {
     return 0;
@@ -2509,7 +2521,7 @@ void rsi_ble_gatt_extended_register_callbacks(rsi_ble_on_mtu_exchange_info_t ble
  *             If call_back_id is greater than the maximum callbacks to register, returns \ref RSI_ERROR_BLE_INVALID_CALLBACK_CNT.
  * @note        In callbacks, application should not initiate any TX operation to the module.
  */
-uint32_t rsi_ble_enhanced_gap_extended_register_callbacks(uint16_t callback_id,
+int32_t rsi_ble_enhanced_gap_extended_register_callbacks(uint16_t callback_id,
                                                           void (*callback_handler_ptr)(uint16_t status,
                                                                                        uint8_t *buffer))
 {
@@ -3025,7 +3037,7 @@ void rsi_ble_callbacks_handler(rsi_bt_cb_t *ble_cb, uint16_t rsp_type, uint8_t *
   if (le_cmd_inuse_check) {
     uint8_t inx                 = 0;
     uint8_t *remote_dev_bd_addr = (uint8_t *)payload;
-    for (inx = 0; inx < (RSI_BLE_MAX_NBR_PERIPHERALS + RSI_BLE_MAX_NBR_CENTRALS); inx++) {
+    for (inx = 0; inx < (RSI_BLE_MAX_NBR_SLAVES + RSI_BLE_MAX_NBR_MASTERS); inx++) {
       if (!memcmp(ble_cb->remote_ble_info[inx].remote_dev_bd_addr, remote_dev_bd_addr, RSI_DEV_ADDR_LEN)) {
         if (ble_cb->remote_ble_info[inx].cmd_in_use) {
           if ((rsp_type == RSI_BLE_EVENT_GATT_ERROR_RESPONSE)
@@ -4342,7 +4354,7 @@ uint16_t rsi_bt_prepare_le_pkt(uint16_t cmd_type, void *cmd_struct, rsi_pkt_t *p
   if (le_buf_check || le_cmd_inuse_check || le_buf_in_use_check) {
     uint8_t inx                 = 0;
     uint8_t *remote_dev_bd_addr = (uint8_t *)cmd_struct;
-    for (inx = 0; inx < (RSI_BLE_MAX_NBR_PERIPHERALS + RSI_BLE_MAX_NBR_CENTRALS); inx++) {
+    for (inx = 0; inx < (RSI_BLE_MAX_NBR_SLAVES + RSI_BLE_MAX_NBR_MASTERS); inx++) {
       if (!memcmp(le_cb->remote_ble_info[inx].remote_dev_bd_addr, remote_dev_bd_addr, RSI_DEV_ADDR_LEN)) {
 
         /* ERROR PRONE : Do not changes if else checks order */
@@ -4428,6 +4440,10 @@ int32_t rsi_bt_driver_send_cmd(uint16_t cmd, void *cmd_struct, void *resp)
 
   protocol_type = rsi_bt_get_proto_type(cmd, &bt_cb);
 
+  if (bt_cb == NULL) {
+    return RSI_ERROR_INVALID_MEMORY;
+  }
+
   SL_PRINTF(SL_RSI_BT_SEND_CMD_PROTOCOL_TYPE, BLUETOOTH, LOG_INFO, "PROTOCOL_TYPE: %2x", protocol_type);
   if (protocol_type == 0xFF) {
     // Return packet allocation failure error
@@ -4477,9 +4493,6 @@ int32_t rsi_bt_driver_send_cmd(uint16_t cmd, void *cmd_struct, void *resp)
   // Allocate command buffer from ble pool
   pkt = rsi_pkt_alloc(&bt_cb->bt_tx_pool);
 
-  // Get host descriptor pointer
-  host_desc = (pkt->desc);
-
   // If allocation of packet fails
   if (pkt == NULL) {
     rsi_bt_clear_wait_bitmap(protocol_type, BT_CMD_SEM);
@@ -4490,6 +4503,9 @@ int32_t rsi_bt_driver_send_cmd(uint16_t cmd, void *cmd_struct, void *resp)
 
     return RSI_ERROR_PKT_ALLOCATION_FAILURE;
   }
+
+  // Get host descriptor pointer
+  host_desc = (pkt->desc);
 
   // Memset host descriptor
   memset(host_desc, 0, RSI_HOST_DESC_LENGTH);

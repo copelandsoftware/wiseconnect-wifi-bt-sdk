@@ -49,7 +49,7 @@ uint8_t rsi_convert_db_to_powindex(int8_t tx_power_in_dBm)
   module_type mod_type_temp;
   int16_t status;
   SL_PRINTF(SL_RSI_CONVERT_DB_TO_POWERINDEX_TRIGGER, BLE, LOG_INFO);
-  status = rsi_get_module_type(&mod_type_temp);
+  status = rsi_get_module_type((uint8_t*)&mod_type_temp);
   if (status == RSI_SUCCESS) {
     tx_power_in_dBm += BLE_OUTPUT_POWER_FRONT_END_LOSS;
     if ((tx_power_in_dBm < RSI_MIN_OUTPUT_POWER_IN_DBM) || (tx_power_in_dBm > RSI_MAX_OUTPUT_POWER_IN_DBM)) {
@@ -1089,7 +1089,7 @@ int32_t rsi_ble_clear_acceptlist(void)
 {
   SL_PRINTF(SL_RSI_BLE_CLEAR_ACCEPTLIST_TRIGGER, BLE, LOG_INFO);
   rsi_ble_accept_list_t le_acceptlist = { 0 };
-  le_acceptlist.addordeltoacceptlist  = CLEAR_ACCEPTLIST;
+  le_acceptlist.addordeltoacceptlist  = CLEAR_WHITELIST;
 
   return rsi_bt_driver_send_cmd(RSI_BLE_LE_ACCEPT_LIST, &le_acceptlist, NULL);
 }
@@ -1113,7 +1113,7 @@ int32_t rsi_ble_addto_acceptlist(int8_t *dev_address, uint8_t dev_addr_type)
 
   SL_PRINTF(SL_RSI_BLE_ADD_TO_ACCEPTLIST, BLE, LOG_INFO, "DEVICE_ADDRESS_TYPE: %1x", dev_addr_type);
   rsi_ble_accept_list_t le_acceptlist = { 0 };
-  le_acceptlist.addordeltoacceptlist  = ADD_DEVICE_TO_ACCEPTLIST;
+  le_acceptlist.addordeltoacceptlist  = ADD_DEVICE_TO_WHITELIST;
 #ifdef BD_ADDR_IN_ASCII
   rsi_ascii_dev_address_to_6bytes_rev(le_acceptlist.dev_addr, dev_address);
 #else
@@ -1142,7 +1142,7 @@ int32_t rsi_ble_deletefrom_acceptlist(int8_t *dev_address, uint8_t dev_addr_type
 
   SL_PRINTF(SL_RSI_BLE_DELETEFROM_ACCEPTLIST, BLE, LOG_INFO, "DEVICE_ADDRESS_TYPE: %1x", dev_addr_type);
   rsi_ble_accept_list_t le_acceptlist = { 0 };
-  le_acceptlist.addordeltoacceptlist  = DELETE_DEVICE_FROM_ACCEPTLIST;
+  le_acceptlist.addordeltoacceptlist  = DELETE_DEVICE_FROM_WHITELIST;
 #ifdef BD_ADDR_IN_ASCII
   rsi_ascii_dev_address_to_6bytes_rev(le_acceptlist.dev_addr, dev_address);
 #else

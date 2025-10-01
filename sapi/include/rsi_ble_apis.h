@@ -2823,7 +2823,7 @@ int32_t rsi_ble_mtu_exchange_event(uint8_t *dev_addr, uint8_t mtu_size);
 int32_t rsi_ble_mtu_exchange_resp(uint8_t *dev_addr, uint8_t mtu_size);
 void rsi_ble_gap_extended_register_callbacks(rsi_ble_on_remote_features_t ble_on_remote_features_event,
                                              rsi_ble_on_le_more_data_req_t ble_on_le_more_data_req_event);
-uint32_t rsi_ble_enhanced_gap_extended_register_callbacks(uint16_t callback_id,
+int32_t rsi_ble_enhanced_gap_extended_register_callbacks(uint16_t callback_id,
                                                           void (*callback_handler_ptr)(uint16_t status,
                                                                                        uint8_t *buffer));
 int32_t rsi_ble_set_wo_resp_notify_buf_info(uint8_t *dev_addr, uint8_t buf_mode, uint8_t buf_cnt);
