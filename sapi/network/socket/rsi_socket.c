@@ -3962,7 +3962,9 @@ int32_t rsi_wlan_socket_get_status(int32_t sockID)
 void rsi_wlan_socket_set_status(int32_t status, int32_t sockID)
 {
   SL_PRINTF(SL_WLAN_SOCKET_SET_STATUS_ENTRY, NETWORK, LOG_INFO);
-  rsi_socket_pool_non_rom[sockID].socket_status = status;
+  if (sockID > 0 && sockID < RSI_NUMBER_OF_SOCKETS) {
+    rsi_socket_pool_non_rom[sockID].socket_status = status;
+  }
 #ifndef RSI_WLAN_STATUS
   rsi_wlan_set_status(status);
 #endif
