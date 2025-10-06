@@ -2532,7 +2532,7 @@ uint32_t rsi_ble_enhanced_gap_extended_register_callbacks(uint16_t callback_id,
 
     /*Return , if the callback number exceeds the RSI_BT_COMMON_MAX_NUM_EXT_CALLBACKS */
 
-    return RSI_ERROR_BLE_INVALID_CALLBACK_CNT;
+    return (uint32_t)RSI_ERROR_BLE_INVALID_CALLBACK_CNT;
   }
   switch (callback_id) {
     case RSI_BLE_ON_REMOTE_DEVICE_INFORMATION: {
@@ -2543,7 +2543,7 @@ uint32_t rsi_ble_enhanced_gap_extended_register_callbacks(uint16_t callback_id,
     } break;
     default:
       LOG_PRINT("\nInvalid Callback ID\n");
-      return RSI_ERROR_BLE_INVALID_CALLBACK_CNT;
+      return (uint32_t)RSI_ERROR_BLE_INVALID_CALLBACK_CNT;
   }
   return RSI_SUCCESS;
 }

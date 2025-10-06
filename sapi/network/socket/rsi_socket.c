@@ -4540,7 +4540,7 @@ int32_t rsi_set_sni_emb_socket(uint8_t app_protocol, uint8_t *hostname, uint16_t
  * 
  */
 
-uint32_t rsi_network_app_protocol_config(nw_app_protocol protocol,
+int32_t rsi_network_app_protocol_config(nw_app_protocol protocol,
                                          nw_app_config config_type,
                                          void *config,
                                          uint16_t config_length)
