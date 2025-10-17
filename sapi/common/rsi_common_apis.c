@@ -2919,8 +2919,8 @@ int32_t rsi_set_region(void)
   status = rsi_wlan_get_status();
   if (status != RSI_SUCCESS) {
     rsi_check_and_update_cmd_state(WLAN_CMD, ALLOW);
-    return status;
   }
+  return status;  
 #else
   return RSI_ERROR_SET_REGION_NOT_ENABLED;
 #endif
